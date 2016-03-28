@@ -5,7 +5,7 @@
   "main": "mappa.js",
   "scripts": {
     "test": "mocha *.js **/*.js",
-    "test:w": "mocha --reporter mocha-better-spec-reporter --watch *.js **/*.js"
+    "test:w": "mocha --watch *.js **/*.js"
   },
   "repository": {
     "type": "git",
@@ -25,8 +25,7 @@
   "homepage": "https://bitbucket.org/skuester/mappa#readme",
   "devDependencies": {
     "chai": "^3.5.0",
-    "mocha": "^2.4.5",
-    "mocha-better-spec-reporter": "^3.0.1"
+    "mocha": "^2.4.5"
   },
   "dependencies": {
     "lodash": "^4.6.1"
