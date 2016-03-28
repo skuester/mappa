@@ -4,8 +4,8 @@
   "description": "Two way, composable, functional object mapper",
   "main": "mappa.js",
   "scripts": {
-    "test": "mocha **.js",
-    "test:w": "mocha --reporter mocha-better-spec-reporter --watch **.js"
+    "test": "mocha *.js **/*.js",
+    "test:w": "mocha --reporter mocha-better-spec-reporter --watch *.js **/*.js"
   },
   "repository": {
     "type": "git",

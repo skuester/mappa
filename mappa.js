@@ -1,5 +1,7 @@
 var _get = require('lodash/get')
 var _set = require('lodash/set')
+var Helper = require('./lib/helper')
+
 // TODO: Object.keys shim
 module.exports = Mappa
 
@@ -54,3 +56,6 @@ function Mappa(config) {
 		})
 	}
 }
+
+
+Mappa.helper = Helper
