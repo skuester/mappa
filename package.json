@@ -1,0 +1,34 @@
+{
+  "name": "mappa",
+  "version": "0.1.0",
+  "description": "Two way, composable, functional object mapper",
+  "main": "mappa.js",
+  "scripts": {
+    "test": "mocha **.js",
+    "test:w": "mocha --reporter mocha-better-spec-reporter --watch **.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skuester/mappa.git"
+  },
+  "keywords": [
+    "object",
+    "mapper",
+    "domain",
+    "transform",
+    "functional",
+    "composable",
+    "simple"
+  ],
+  "author": "shout@shanekuester.com",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/skuester/mappa#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5",
+    "mocha-better-spec-reporter": "^3.0.1"
+  },
+  "dependencies": {
+    "lodash": "^4.6.1"
+  }
+}
