@@ -31,6 +31,35 @@ describe ("Mappa", function () {
 	});
 
 
+	it ("can use a _read_if() and _write_if() guard function to decide if the operation should occur.", function () {
+		var mapper = Mapper({
+			name: {
+				_read_if: function (source) {
+					return source.data.id
+				},
+				_read: function (source) {
+					return source.data.name
+				},
+				_write_if: function (value, source) {
+					return value.length > 3
+				},
+				_write: function (value, source) {
+					source.data = {name: value}
+				}
+			}
+		})
+
+		expect( mapper.read({data:{name: 'name value'}}) ).to.eql( {} )
+		expect( mapper.read({data:{id: 123, name: 'name value'}}) ).to.eql( {name: 'name value'} )
+
+		expect( mapper.write({name: 'max'}) ).to.eql( {})
+		expect( mapper.write({name: 'maximus'}) ).to.eql( {data: {name: 'maximus'}})
+	});
+
+
+	// SUGAR
+
+
 	it ("maps an object path with a string", function () {
 		var mapper = Mapper({
 			name: 'data.OldName'

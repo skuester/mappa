@@ -57,15 +57,18 @@ function Mappa(config) {
 function PathConfig(key, config) {
 	if (_isString(config)) {
 		if (config === '=') config = key
-		return Helper.key(config)
+		config = Helper.key(config)
 	}
 
+	default_to_constant_fn(config, '_read_if', true)
+	default_to_constant_fn(config, '_write_if', true)
 	return config
 }
 
 
 function ReadOp(key, path_config) {
 	return function (source, obj) {
+		if (!path_config._read_if(source)) return
 		_set(obj, key, path_config._read(source))
 	}
 }
@@ -74,9 +77,19 @@ function ReadOp(key, path_config) {
 
 function WriteOp(key, path_config) {
 	return function (obj, source) {
-		path_config._write(_get(obj, key), source)
+		var value = _get(obj, key)
+		if (!path_config._write_if(value, source)) return
+		path_config._write(value, source)
 	}
 }
 
+
+// MUTATES the obj
+// if the key is not a function, create one which returns the given return_value
+function default_to_constant_fn(obj, key, return_value) {
+	if (!(typeof obj[key] == 'function')) {
+		obj[key] = function () { return return_value }
+	}
+}
 
 Mappa.helper = Helper
