@@ -111,10 +111,80 @@ describe ("Mappa", function () {
 	});
 
 
-	it ("maps an array with a sub-mapper", function () {
-		var mapper = Mapper({
+	describe ("with an array", function () {
+		it ("maps an array with a sub-mapper: helper.array()", function () {
+			var mapper = Mapper({
+				people: [ 'People', {name: 'PersonName'} ]
+			})
 
+			var source = {
+				People: [
+					{PersonName: 'A'},
+					{PersonName: 'B'},
+				]
+			}
+
+			var result = {
+				people: [
+					{name: 'A'},
+					{name: 'B'},
+				]
+			}
+
+			expect( mapper.read(source) ).to.eql( result )
+			expect( mapper.write(result) ).to.eql( source )
+		});
+	});
+
+
+	describe ("with an object", function () {
+		it ("maps a nested object with a sub-mapper: helper.mapper()", function () {
+			var mapper = Mapper({
+				person: {
+					name: 'PersonName'
+				}
+			})
+
+			var source = {
+				PersonName: 'PersonName value'
+			}
+
+			var result = {
+				person: {
+					name: 'PersonName value'
+				}
+			}
+
+			expect( mapper.read(source) ).to.eql( result )
+			expect( mapper.write(result) ).to.eql( source )
+		});
+	});
+
+
+	// options
+
+	it ("can modify an existing object during read() or write() with {to}", function () {
+		var mapper = Mapper({
+			renamed: 'uglyName',
 		})
+
+		var source = {
+			uglyName: 'uglyName value'
+		}
+
+		var result = {
+			renamed: 'uglyName value'
+		}
+
+		var obj
+
+		obj = {}
+		mapper.read(source, {to: obj})
+		expect( obj ).to.eql( result )
+
+		obj = {}
+		mapper.write(result, {to: obj})
+		expect( obj ).to.eql( source )
 	});
 
 });

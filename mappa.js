@@ -1,6 +1,7 @@
 var _get = require('lodash/get')
 var _set = require('lodash/set')
 var _isString = require('lodash/isString')
+var _isArray = require('lodash/isArray')
 var Helper = require('./lib/helper')
 
 // TODO: Object.keys shim
@@ -11,9 +12,7 @@ function Mappa(config) {
 	var read_ops = []
 	var write_ops = []
 
-
 	init(config)
-
 
 	return {
 		read: read,
@@ -21,10 +20,10 @@ function Mappa(config) {
 	}
 
 
+	function read(source, opts) {
+		opts = opts || {}
 
-
-	function read(source) {
-		var obj = {}
+		var obj = opts.to || {}
 		read_ops.forEach(function (op) {
 			op(source, obj)
 		})
@@ -32,8 +31,10 @@ function Mappa(config) {
 	}
 
 
-	function write(obj) {
-		var source = {}
+	function write(obj, opts) {
+		opts = opts || {}
+
+		var source = opts.to || {}
 		write_ops.forEach(function (op) {
 			op(obj, source)
 		})
@@ -52,12 +53,21 @@ function Mappa(config) {
 		}
 	}
 }
+Mappa.helper = Helper
+
+
 
 
 function PathConfig(key, config) {
 	if (_isString(config)) {
 		if (config === '=') config = key
 		config = Helper.key(config)
+	}
+	else if (_isArray(config)) {
+		config = Helper.array(config[0], Mappa(config[1]))
+	}
+	else if (!(config._read || config._write)) {
+		config = Helper.mapper(Mappa(config))
 	}
 
 	default_to_constant_fn(config, '_read_if', true)
@@ -72,7 +82,6 @@ function ReadOp(key, path_config) {
 		_set(obj, key, path_config._read(source))
 	}
 }
-
 
 
 function WriteOp(key, path_config) {
@@ -91,5 +100,3 @@ function default_to_constant_fn(obj, key, return_value) {
 		obj[key] = function () { return return_value }
 	}
 }
-
-Mappa.helper = Helper
