@@ -72,4 +72,20 @@ describe ("Mappa", function () {
 	});
 
 
+	it ("sets missing keys to undefined", function () {
+		var mapper = Mapper({
+			missing: 'UglyMissing'
+		})
+
+		expect( mapper.read({})  ).to.eql( {missing: undefined} )
+		expect( mapper.write({}) ).to.eql( {UglyMissing: undefined} )
+	});
+
+
+	it ("maps an array with a sub-mapper", function () {
+		var mapper = Mapper({
+
+		})
+	});
+
 });
