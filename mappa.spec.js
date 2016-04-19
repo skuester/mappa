@@ -97,7 +97,7 @@ describe ("Mappa", function () {
 
 
 	describe ("with multiple blocks", function () {
-		it ("_map: runs each block of changes on the same object.", function () {
+		it ("_map runs each block of changes on the same object.", function () {
 			var mapper = Mapper([
 				{
 					_map: {
@@ -124,6 +124,67 @@ describe ("Mappa", function () {
 			expect( mapper.read(source) ).to.eql( target )
 			expect( mapper.write(target) ).to.eql( source )
 		});
+
+
+		it ("_read_if() receives the source object, and determines if each block runs during read.", function () {
+			var mapper = Mapper([
+				{
+					_map: {
+						name: Mapper.helper.key('OldName')
+					},
+				},
+				{
+					_read_if: function (source) {
+						return source.ID != null
+					},
+					_map: {
+						age: Mapper.helper.key('OldAge')
+					}
+				}
+			])
+
+			var source = {
+				OldName: 'OldName value',
+				OldAge: 'OldAge value'
+			}
+
+			var target = {
+				name: 'OldName value'
+			}
+
+			expect( mapper.read(source) ).to.eql( target )
+		});
+
+
+		it ("_write_if() receives the target object, and determines if each block runs during write.", function () {
+			var mapper = Mapper([
+				{
+					_map: {
+						name: Mapper.helper.key('OldName')
+					},
+				},
+				{
+					_write_if: function (target) {
+						return (target.name == 'pass')
+					},
+					_map: {
+						age: Mapper.helper.key('OldAge')
+					}
+				}
+			])
+
+			var source = {
+				OldName: 'OldName value',
+				OldAge: 'OldAge value'
+			}
+
+			var target = {
+				name: 'OldName value'
+			}
+
+			expect( mapper.write({name: 'pass', age: 15}) ).to.eql( {OldName: 'pass', OldAge: 15} )
+			expect( mapper.write({name: 'fail', age: 15}) ).to.eql( {OldName: 'fail'} )
+		});
 	});
 
 
@@ -132,6 +193,31 @@ describe ("Mappa", function () {
 
 
 	// SUGAR
+
+
+	it ("accepts a simple block format", function () {
+		var mapper = Mapper([
+			{
+				name: 'OldName'
+			},
+			{
+				age: 'OldAge'
+			}
+		])
+
+		var source = {
+			OldName: 'OldName value',
+			OldAge: 'OldAge value'
+		}
+
+		var target = {
+			name: 'OldName value',
+			age: 'OldAge value'
+		}
+
+		expect( mapper.read(source) ).to.eql( target )
+		expect( mapper.write(target) ).to.eql( source )
+	});
 
 
 	describe ("with a string", function () {

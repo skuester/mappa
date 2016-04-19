@@ -49,8 +49,8 @@ function Mappa(config) {
 		MapperConfig(config).forEach(function (block) {
 			for (var key in block._map) {
 				var path_config = PathConfig(key, block._map[key])
-				read_ops.push(ReadOp(key, path_config))
-				write_ops.push(WriteOp(key, path_config))
+				read_ops.push(ReadOp(key, block, path_config))
+				write_ops.push(WriteOp(key, block, path_config))
 			}
 		})
 	}
@@ -60,8 +60,8 @@ Mappa.helper = Helper
 
 
 function MapperConfig(config) {
-	if (!_isArray(config)) config = [BlockConfig(config)]
-	return config
+	if (!_isArray(config)) config = [config]
+	return config.map(BlockConfig)
 }
 
 
@@ -70,6 +70,8 @@ function BlockConfig(config) {
 		config = {_map: config}
 	}
 
+	default_to_constant_fn(config, '_read_if', true)
+	default_to_constant_fn(config, '_write_if', true)
 	return config
 }
 
@@ -92,17 +94,19 @@ function PathConfig(key, config) {
 }
 
 
-function ReadOp(key, path_config) {
+function ReadOp(key, block, path_config) {
 	return function (source, obj) {
+		if (!block._read_if(source)) return
 		if (!path_config._read_if(source)) return
 		_set(obj, key, path_config._read(source))
 	}
 }
 
 
-function WriteOp(key, path_config) {
+function WriteOp(key, block, path_config) {
 	return function (obj, source) {
 		var value = _get(obj, key)
+		if (!block._write_if(obj)) return
 		if (!path_config._write_if(value, source)) return
 		path_config._write(value, source)
 	}
