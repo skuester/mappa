@@ -46,16 +46,32 @@ function Mappa(config) {
 
 
 	function init(config) {
-		for (var key in config) {
-			var path_config = PathConfig(key, config[key])
-			read_ops.push(ReadOp(key, path_config))
-			write_ops.push(WriteOp(key, path_config))
-		}
+		MapperConfig(config).forEach(function (block) {
+			for (var key in block._map) {
+				var path_config = PathConfig(key, block._map[key])
+				read_ops.push(ReadOp(key, path_config))
+				write_ops.push(WriteOp(key, path_config))
+			}
+		})
 	}
 }
 Mappa.helper = Helper
 
 
+
+function MapperConfig(config) {
+	if (!_isArray(config)) config = [BlockConfig(config)]
+	return config
+}
+
+
+function BlockConfig(config) {
+	if (!config._map) {
+		config = {_map: config}
+	}
+
+	return config
+}
 
 
 function PathConfig(key, config) {

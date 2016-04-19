@@ -96,6 +96,37 @@ describe ("Mappa", function () {
 	}); // property config
 
 
+	describe ("with multiple blocks", function () {
+		it ("_map: runs each block of changes on the same object.", function () {
+			var mapper = Mapper([
+				{
+					_map: {
+						name: Mapper.helper.key('OldName')
+					},
+				},
+				{
+					_map: {
+						age: Mapper.helper.key('OldAge')
+					}
+				}
+			])
+
+			var source = {
+				OldName: 'OldName value',
+				OldAge: 'OldAge value'
+			}
+
+			var target = {
+				name: 'OldName value',
+				age: 'OldAge value'
+			}
+
+			expect( mapper.read(source) ).to.eql( target )
+			expect( mapper.write(target) ).to.eql( source )
+		});
+	});
+
+
 
 
 
