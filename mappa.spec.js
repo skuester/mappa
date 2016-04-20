@@ -29,6 +29,55 @@ describe ("Mappa", function () {
 
 				expect( mapper.read(source) ).to.eql( target )
 			});
+
+
+			it ("will catch a Mappa.Error and return undefined", function () {
+				var mapper = Mapper({
+					name: {
+						_read: function (source) {
+							throw new Mapper.Error()
+							return source.data.OldName
+						}
+					}
+				})
+
+				var source = {
+					data: {
+						OldName: 'OldName Value',
+					}
+				}
+
+				var target = {
+					name: 'OldName Value'
+				}
+
+				expect( mapper.read(source) ).to.be.undefined
+				expect(function () { mapper.read(source) }).not.to.throw()
+			});
+
+
+			it ("will not catch non-Mappa errors", function () {
+				var mapper = Mapper({
+					name: {
+						_read: function (source) {
+							throw new Error('Eh?')
+							return source.data.OldName
+						}
+					}
+				})
+
+				var source = {
+					data: {
+						OldName: 'OldName Value',
+					}
+				}
+
+				var target = {
+					name: 'OldName Value'
+				}
+
+				expect(function () { mapper.read(source) }).to.throw()
+			});
 		});
 
 		describe ("_write()", function () {

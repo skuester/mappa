@@ -24,11 +24,17 @@ function Mappa(config) {
 	function read(source, opts) {
 		opts = opts || {}
 
-		var target = opts.to || {}
-		read_ops.forEach(function (op) {
-			op(source, target)
-		})
-		return after_read(target)
+		try {
+			var target = opts.to || {}
+			read_ops.forEach(function (op) {
+				op(source, target)
+			})
+			return after_read(target)
+		}
+		catch (error) {
+			if (error.name === 'MappaError') return
+			throw error
+		}
 	}
 
 
@@ -65,6 +71,7 @@ function Mappa(config) {
 	}
 }
 Mappa.helper = Helper
+Mappa.Error = MappaError
 
 
 
@@ -142,4 +149,11 @@ function to_array(value) {
 
 function identity(value) {
 	return value
+}
+
+
+function MappaError(message) {
+	var err = new Error(message)
+	err.name = "MappaError"
+	return err
 }
