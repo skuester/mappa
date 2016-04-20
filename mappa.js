@@ -11,6 +11,7 @@ module.exports = Mappa
 function Mappa(config) {
 	var read_ops = []
 	var write_ops = []
+	var after_read = identity
 
 	init(config)
 
@@ -27,7 +28,7 @@ function Mappa(config) {
 		read_ops.forEach(function (op) {
 			op(source, obj)
 		})
-		return obj
+		return after_read(obj)
 	}
 
 
@@ -55,6 +56,12 @@ function Mappa(config) {
 				write_ops.push(WriteOp(key, block, path_config))
 			}
 		})
+
+		if (config._constructor) {
+			after_read = function (mapped) {
+				return new config._constructor(mapped)
+			}
+		}
 	}
 }
 Mappa.helper = Helper
@@ -130,4 +137,9 @@ function default_to_constant_fn(obj, key, return_value) {
 
 function to_array(value) {
 	return [].concat(value)
+}
+
+
+function identity(value) {
+	return value
 }

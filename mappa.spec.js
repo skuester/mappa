@@ -239,35 +239,32 @@ describe ("Mappa", function () {
 	});
 
 
-	// describe ("node-level config", function () {
-	// 	it ("_constructor will be called with `new` after a read operation", function () {
-	// 		var mapper = Mapper({
-	// 			_constructor: Sample,
-	// 			// _read_if()
-	// 			_blocks: [
-	// 				{
-	// 					_path: 'some.path',
-	// 					_map: {name: 'OldName'}
-	// 				}
-	// 			]
-	// 		})
+	describe ("_constructor config", function () {
+		it ("_constructor will be called with `new` after a read operation", function () {
+			function Sample(opts) {
+				this.name = opts.name
+			}
 
-	// 		var source = {
-	// 			some: {
-	// 				path: {
-	// 					OldName: 'OldName value'
-	// 				}
-	// 			}
-	// 		}
+			var mapper = Mapper({
+				_constructor: Sample,
+				_blocks: [
+					{
+						_map: {name: 'OldName'}
+					}
+				]
+			})
 
-	// 		var target = {
-	// 			sample:
-	// 		}
+			var source = {
+				OldName: 'OldName value'
+			}
 
-	// 		expect( target ).to.be.instanceOf( Sample )
-	// 		expect( target.name ).to.eql( 'OldName value' )
-	// 	});
-	// });
+			var target = mapper.read(source)
+
+			expect( target ).to.be.instanceOf( Sample )
+			expect( target.name ).to.eql( 'OldName value' )
+		});
+
+	});
 
 
 
