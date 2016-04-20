@@ -126,6 +126,57 @@ describe ("Mappa", function () {
 		});
 
 
+		it ("can be located under the full _blocks property", function () {
+			var mapper = Mapper({
+				_blocks: [
+					{
+						_map: {
+							name: Mapper.helper.key('OldName')
+						},
+					},
+					{
+						_map: {
+							age: Mapper.helper.key('OldAge')
+						}
+					}
+				]
+			})
+
+			var source = {
+				OldName: 'OldName value',
+				OldAge: 'OldAge value'
+			}
+
+			var target = {
+				name: 'OldName value',
+				age: 'OldAge value'
+			}
+
+			expect( mapper.read(source) ).to.eql( target )
+			expect( mapper.write(target) ).to.eql( source )
+		});
+
+
+		it ("called with a simple blocks config", function () {
+			var mapper = Mapper({
+				_blocks: {
+					name: Mapper.helper.key('OldName')
+				}
+			})
+
+			var source = {
+				OldName: 'OldName value',
+			}
+
+			var target = {
+				name: 'OldName value',
+			}
+
+			expect( mapper.read(source) ).to.eql( target )
+			expect( mapper.write(target) ).to.eql( source )
+		});
+
+
 		it ("_read_if() receives the source object, and determines if each block runs during read.", function () {
 			var mapper = Mapper([
 				{
@@ -186,6 +237,40 @@ describe ("Mappa", function () {
 			expect( mapper.write({name: 'fail', age: 15}) ).to.eql( {OldName: 'fail'} )
 		});
 	});
+
+
+	// describe ("node-level config", function () {
+	// 	it ("_constructor will be called with `new` after a read operation", function () {
+	// 		var mapper = Mapper({
+	// 			_constructor: Sample,
+	// 			// _read_if()
+	// 			_blocks: [
+	// 				{
+	// 					_path: 'some.path',
+	// 					_map: {name: 'OldName'}
+	// 				}
+	// 			]
+	// 		})
+
+	// 		var source = {
+	// 			some: {
+	// 				path: {
+	// 					OldName: 'OldName value'
+	// 				}
+	// 			}
+	// 		}
+
+	// 		var target = {
+	// 			sample:
+	// 		}
+
+	// 		expect( target ).to.be.instanceOf( Sample )
+	// 		expect( target.name ).to.eql( 'OldName value' )
+	// 	});
+	// });
+
+
+
 
 
 
