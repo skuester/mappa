@@ -24,20 +24,20 @@ function Mappa(config) {
 	function read(source, opts) {
 		opts = opts || {}
 
-		var obj = opts.to || {}
+		var target = opts.to || {}
 		read_ops.forEach(function (op) {
-			op(source, obj)
+			op(source, target)
 		})
-		return after_read(obj)
+		return after_read(target)
 	}
 
 
-	function write(obj, opts) {
+	function write(target, opts) {
 		opts = opts || {}
 
 		var source = opts.to || {}
 		write_ops.forEach(function (op) {
-			op(obj, source)
+			op(target, source)
 		})
 		return source
 	}
@@ -108,18 +108,18 @@ function PathConfig(key, config) {
 
 
 function ReadOp(key, block, path_config) {
-	return function (source, obj) {
+	return function (source, target) {
 		if (!block._read_if(source)) return
 		if (!path_config._read_if(source)) return
-		_set(obj, key, path_config._read(source))
+		_set(target, key, path_config._read(source))
 	}
 }
 
 
 function WriteOp(key, block, path_config) {
-	return function (obj, source) {
-		var value = _get(obj, key)
-		if (!block._write_if(obj)) return
+	return function (target, source) {
+		var value = _get(target, key)
+		if (!block._write_if(target)) return
 		if (!path_config._write_if(value, source)) return
 		path_config._write(value, source)
 	}
