@@ -118,7 +118,13 @@ function ReadOp(key, block, path_config) {
 	return function (source, target) {
 		if (!block._read_if(source)) return
 		if (!path_config._read_if(source)) return
-		_set(target, key, path_config._read(source))
+
+		// injector
+		var injected = path_config._from.map(function (path) {
+			return _get(source, path)
+		})
+
+		_set(target, key, path_config._read.apply(null, injected))
 	}
 }
 
@@ -127,8 +133,12 @@ function WriteOp(key, block, path_config) {
 	return function (target, source) {
 		var value = _get(target, key)
 		if (!block._write_if(target)) return
-		if (!path_config._write_if(value, source)) return
-		path_config._write(value, source)
+		if (!path_config._write_if(value)) return
+
+		var values = path_config._write(value)
+		path_config._from.forEach(function (path, i) {
+			_set(source, path, values[i])
+		})
 	}
 }
 
