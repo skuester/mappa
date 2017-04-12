@@ -2,168 +2,49 @@ var _get = require('lodash/get')
 var _set = require('lodash/set')
 var _isString = require('lodash/isString')
 var _isArray = require('lodash/isArray')
-var Helper = require('./lib/helper')
+var _isObject = require('lodash/isObject')
+var _forEach = require('lodash/forEach')
+// var Helper = require('./lib/helper')
 
 // TODO: Object.keys shim
 module.exports = Mappa
 
 
-function Mappa(config) {
-	var read_ops = []
-	var write_ops = []
-	var after_read = identity
-
-	init(config)
-
-	return {
-		read: read,
-		write: write
-	}
+function Mappa(opts) {
+	return new Mapper(opts)
+}
 
 
-	function read(source, opts) {
-		opts = opts || {}
-
-		try {
-			var target = opts.to || {}
-			read_ops.forEach(function (op) {
-				op(source, target)
-			})
-			return after_read(target)
-		}
-		catch (error) {
-			if (error.name === 'MappaError') return
-			throw error
-		}
-	}
+function Mapper(opts) {
+	this.opts = opts
+	this.actions = opts.target
+	normalize_actions(opts.target)
+}
 
 
-	function write(target, opts) {
-		opts = opts || {}
+// Action {from[]}
 
-		var source = opts.to || {}
-		write_ops.forEach(function (op) {
-			op(target, source)
-		})
-		return source
-	}
+Mapper.prototype.read = function (source) {
+	if (!_isObject(source) || _isArray(source)) return
 
+	var target = {}
 
-	// private
+	_forEach(this.actions, function (action, path) {
 
-
-	function init(config) {
-		var config = MapperConfig(config)
-
-		config._blocks.forEach(function (block) {
-			for (var key in block._map) {
-				var path_config = PathConfig(key, block._map[key])
-				read_ops.push(ReadOp(key, block, path_config))
-				write_ops.push(WriteOp(key, block, path_config))
-			}
+		var values = action.from.map(function (p){
+			return _get(source, p)
 		})
 
-		if (config._constructor) {
-			after_read = function (mapped) {
-				return new config._constructor(mapped)
-			}
-		}
-	}
-}
-Mappa.helper = Helper
-Mappa.Error = MappaError
+		_set(target, path, action.read.apply(null, values))
+	})
 
-
-
-
-function MapperConfig(config) {
-	if (!config._blocks) {
-		config = {_blocks: config}
-	}
-	config._blocks = to_array(config._blocks).map(BlockConfig)
-	return config
+	return target
 }
 
 
-function BlockConfig(config) {
-	if (!config._map) {
-		config = {_map: config}
-	}
 
-	default_to_constant_fn(config, '_read_if', true)
-	default_to_constant_fn(config, '_write_if', true)
-	return config
-}
-
-
-function PathConfig(key, config) {
-	if (_isString(config)) {
-		if (config === '=') config = key
-		config = Helper.key(config)
-	}
-	else if (_isArray(config)) {
-		config = Helper.array(config[0], Mappa(config[1]))
-	}
-	else if (!(config._read || config._write)) {
-		config = Helper.mapper(Mappa(config))
-	}
-
-	default_to_constant_fn(config, '_read_if', true)
-	default_to_constant_fn(config, '_write_if', true)
-	return config
-}
-
-
-function ReadOp(key, block, path_config) {
-	return function (source, target) {
-		if (!block._read_if(source)) return
-		if (!path_config._read_if(source)) return
-
-		// injector
-		var injected = path_config._from.map(function (path) {
-			return _get(source, path)
-		})
-
-		_set(target, key, path_config._read.apply(null, injected))
-	}
-}
-
-
-function WriteOp(key, block, path_config) {
-	return function (target, source) {
-		var value = _get(target, key)
-		if (!block._write_if(target)) return
-		if (!path_config._write_if(value)) return
-
-		var values = path_config._write(value)
-		path_config._from.forEach(function (path, i) {
-			_set(source, path, values[i])
-		})
-	}
-}
-
-
-// MUTATES the obj
-// if the key is not a function, create one which returns the given return_value
-function default_to_constant_fn(obj, key, return_value) {
-	if (!(typeof obj[key] == 'function')) {
-		obj[key] = function () { return return_value }
-	}
-}
-
-
-function to_array(value) {
-	return [].concat(value)
-}
-
-
-function identity(value) {
-	return value
-}
-
-
-function MappaError(message) {
-	var err = new Error(message)
-	err.name = "MappaError"
-	return err
+function normalize_actions(target_config) {
+	_forEach(target_config, function (path_config, path) {
+		path_config.from = [].concat(path_config.from)
+	})
 }
