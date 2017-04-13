@@ -47,6 +47,20 @@ describe ("Mappa", function () {
 			});
 		});
 
+
+		describe (".write()", function () {
+			it ("pulls from the target object", function () {
+				expect( mapper.write(target) ).to.eql( source )
+			});
+
+			it ("returns undefined when it cannot use the target", function () {
+				expect( mapper.write() ).to.be.undefined
+				expect( mapper.write(null) ).to.be.undefined
+				expect( mapper.write("not an object") ).to.be.undefined
+				expect( mapper.write([]) ).to.be.undefined
+			});
+		});
+
 	}); // basic examples
 
 });

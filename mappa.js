@@ -42,6 +42,23 @@ Mapper.prototype.read = function (source) {
 }
 
 
+Mapper.prototype.write = function (target) {
+	if (!_isObject(target) || _isArray(target)) return
+
+	var source = {}
+
+	_forEach(this.actions, function (action, path) {
+		var values = action.write(_get(target, path))
+
+		action.from.forEach(function (source_path, i) {
+			_set(source, source_path, values[i])
+		})
+	})
+
+	return source
+};
+
+
 
 function normalize_actions(target_config) {
 	_forEach(target_config, function (path_config, path) {
