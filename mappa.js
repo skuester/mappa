@@ -59,12 +59,11 @@ Mapper.prototype.write = function (target) {
 
 
 Mapper.prototype.sources = function(key_list){
-	var self = this
-	key_list = key_list || Object.keys(self.actions)
-
-	return key_list.reduce(function (result, key) {
-		return result.concat(self.actions[key].from)
-	}, [])
+	var path, source_list = []
+	for (path in this.actions) {
+		source_list = source_list.concat(this.actions[path].from)
+	}
+	return source_list
 };
 
 
