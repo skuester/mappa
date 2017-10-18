@@ -112,6 +112,41 @@ describe ("Mappa", function () {
 		});
 	});
 
+
+	describe (".source_tree()", function () {
+		var mapper
+
+		beforeEach(function () {
+			mapper = sources_example()
+		})
+
+		it ("lists all the sources", function () {
+			expect( mapper.source_tree() ).to.have.same.members([
+				'TopLevel',
+				{
+					from: 'Person',
+					tree: [
+						'FirstName',
+						'LastName',
+						'Age',
+						{
+							from: 'Deep',
+							tree: ['Nesting']
+						}
+					]
+				},
+				{ from: 'Address', tree: ['CityName']},
+			])
+		});
+
+
+		it ("lists the sources for selected paths", function () {
+			expect( mapper.source_tree(['name', 'age']) ).to.have.same.members([
+				{from: 'Person', tree: ['FirstName', 'LastName', 'Age']}
+			])
+		});
+	});
+
 });
 
 
