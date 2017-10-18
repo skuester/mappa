@@ -17,8 +17,8 @@ function Mappa(opts) {
 
 function Mapper(opts) {
 	this.opts = opts
-	this.actions = opts.target
-	normalize_actions(opts.target)
+	this.actions = opts.to
+	normalize_actions(this.actions)
 }
 
 

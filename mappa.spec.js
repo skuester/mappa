@@ -20,10 +20,11 @@ describe ("Mappa", function () {
 			}
 
 			mapper = Mapper({
-				target: {
+				to: {
 					name: {
 						from: ['person.FirstName', 'person.LastName'],
 						read: function (first, last) {
+							if (!first) return "default!"
 							return first + ' ' + last
 						},
 						write: function (value) {
@@ -44,6 +45,10 @@ describe ("Mappa", function () {
 				expect( mapper.read(null) ).to.be.undefined
 				expect( mapper.read("not an object") ).to.be.undefined
 				expect( mapper.read([]) ).to.be.undefined
+			});
+
+			it ("calls the read() fn even when the values it needs are not present", function () {
+				expect( mapper.read({foo: 'bar'}) ).to.eql( {name: 'default!'} )
 			});
 		});
 
