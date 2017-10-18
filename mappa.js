@@ -4,6 +4,7 @@ var _isString = require('lodash/isString')
 var _isArray = require('lodash/isArray')
 var _isObject = require('lodash/isObject')
 var _forEach = require('lodash/forEach')
+var _intersection = require('lodash/intersection')
 // var Helper = require('./lib/helper')
 
 // TODO: Object.keys shim
@@ -20,8 +21,6 @@ function Mapper(opts) {
 	this.actions = normalize_actions(opts.to)
 }
 
-
-// Action {from[]}
 
 Mapper.prototype.read = function (source) {
 	if (!_isObject(source) || _isArray(source)) return
@@ -58,12 +57,13 @@ Mapper.prototype.write = function (target) {
 };
 
 
-Mapper.prototype.sources = function(key_list){
-	var path, source_list = []
-	for (path in this.actions) {
-		source_list = source_list.concat(this.actions[path].from)
-	}
-	return source_list
+Mapper.prototype.sources = function(picked_paths){
+	var self = this
+	var path_list = Object.keys(self.actions)
+	if (picked_paths) path_list = _intersection(path_list, picked_paths)
+	return path_list.reduce(function(result, path) {
+		return result.concat(self.actions[path].from)
+	}, [])
 };
 
 

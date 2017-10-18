@@ -71,20 +71,25 @@ describe ("Mappa", function () {
 
 
 
+	function sources_example() {
+		return Mapper({
+			to: {
+				name: ['Person.FirstName', 'Person.LastName'],
+				city: 'Address.CityName',
+				age: 'Person.Age',
+				other: 'TopLevel',
+				deep: 'Person.Deep.Nesting'
+			}
+		})
+	}
+
 
 	describe (".sources()", function () {
 		var mapper
 
 		beforeEach(function () {
-			mapper = Mapper({
-				to: {
-					name: ['Person.FirstName', 'Person.LastName'],
-					city: 'Address.CityName',
-					age: 'Person.Age',
-				}
-			})
+			mapper = sources_example()
 		})
-
 
 		it ("lists all the sources", function () {
 			expect( mapper.sources() ).to.have.same.members([
@@ -92,8 +97,23 @@ describe ("Mappa", function () {
 				'Person.LastName',
 				'Person.Age',
 				'Address.CityName',
+				'TopLevel',
+				'Person.Deep.Nesting',
+			])
+		});
+
+
+		it ("lists the sources for selected paths", function () {
+			expect( mapper.sources(['name', 'age']) ).to.have.same.members([
+				'Person.FirstName',
+				'Person.LastName',
+				'Person.Age',
 			])
 		});
 	});
 
 });
+
+
+
+
