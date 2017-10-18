@@ -17,8 +17,7 @@ function Mappa(opts) {
 
 function Mapper(opts) {
 	this.opts = opts
-	this.actions = opts.to
-	normalize_actions(this.actions)
+	this.actions = normalize_actions(opts.to)
 }
 
 
@@ -59,9 +58,41 @@ Mapper.prototype.write = function (target) {
 };
 
 
+Mapper.prototype.sources = function(key_list){
+	var self = this
+	key_list = key_list || Object.keys(self.actions)
+
+	return key_list.reduce(function (result, key) {
+		return result.concat(self.actions[key].from)
+	}, [])
+};
+
+
 
 function normalize_actions(target_config) {
-	_forEach(target_config, function (path_config, path) {
-		path_config.from = [].concat(path_config.from)
-	})
+	var path
+
+	for (path in target_config) {
+		target_config[path] = PathConfig(target_config[path])
+	}
+
+	return target_config
 }
+
+
+
+function PathConfig(config) {
+	if (_isString(config) || _isArray(config)) {
+		config = {from: config}
+	}
+
+	config.from = [].concat(config.from)
+	config.read = config.read || pass_thru
+	config.write = config.write || pass_thru
+
+	return config
+}
+
+
+
+function pass_thru(value) { return value }

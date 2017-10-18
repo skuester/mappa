@@ -68,4 +68,32 @@ describe ("Mappa", function () {
 
 	}); // basic examples
 
+
+
+
+
+	describe (".sources()", function () {
+		var mapper
+
+		beforeEach(function () {
+			mapper = Mapper({
+				to: {
+					name: ['Person.FirstName', 'Person.LastName'],
+					city: 'Address.CityName',
+					age: 'Person.Age',
+				}
+			})
+		})
+
+
+		it ("lists all the sources", function () {
+			expect( mapper.sources() ).to.have.same.members([
+				'Person.FirstName',
+				'Person.LastName',
+				'Person.Age',
+				'Address.CityName',
+			])
+		});
+	});
+
 });
