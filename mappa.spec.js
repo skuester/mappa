@@ -12,11 +12,13 @@ describe ("Mappa", function () {
 				person: {
 					FirstName: 'John',
 					LastName: 'Smith',
-				}
+				},
+				simple_key: 'simple_key value',
 			}
 
 			target = {
-				name: 'John Smith'
+				name: 'John Smith',
+				simple: 'simple_key value',
 			}
 
 			mapper = Mapper({
@@ -32,6 +34,7 @@ describe ("Mappa", function () {
 							return value.split(' ')
 						}
 					},
+					simple: 'simple_key'
 				}
 			})
 		})

@@ -51,7 +51,7 @@ Mapper.prototype.write = function (target) {
 	var source = {}, path
 
 	for (path in this.actions) {
-		var values = this.actions[path].write(_get(target, path))
+		var values = [].concat(this.actions[path].write(_get(target, path)))
 
 		this.actions[path].from.forEach(function (source_path, i) {
 			_set(source, source_path, values[i])
