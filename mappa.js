@@ -73,6 +73,38 @@ Mapper.prototype.sources = function(picked_paths){
 
 
 
+Mapper.prototype.source_tree = function(picked_paths){
+	var source_list = this.sources(picked_paths)
+
+	var virtual_source = {}
+
+	source_list.forEach(path => {
+		_set(virtual_source, path, true)
+	})
+
+	return get_source_tree_for_node(virtual_source)
+};
+
+
+function get_source_tree_for_node(node, output) {
+	var output = {}
+
+	_forEach(node, function (value, key) {
+		if (value === true) {
+			output.fields = output.fields || []
+			output.fields.push(key)
+		}
+		else {
+			output.from = output.from || {}
+			output.from[key] = get_source_tree_for_node(node[key])
+		}
+	})
+
+	return output
+}
+
+
+
 function normalize_actions(target_config) {
 	var path
 

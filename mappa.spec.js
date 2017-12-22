@@ -76,27 +76,24 @@ describe ("Mappa", function () {
 
 
 
-	function sources_example() {
-		return Mapper({
-			to: {
-				name: ['Person.FirstName', 'Person.LastName'],
-				city: 'Address.CityName',
-				age: 'Person.Age',
-				other: 'TopLevel',
-				deep: 'Person.Deep.Nesting'
-			}
-		})
-	}
-
 
 	describe (".sources()", function () {
 		var mapper
 
 		beforeEach(function () {
-			mapper = sources_example()
+			mapper = Mapper({
+				to: {
+					name: ['Person.FirstName', 'Person.LastName'],
+					city: 'Address.CityName',
+					age: 'Person.Age',
+					other: 'TopLevel',
+					deep: 'Person.Deep.Nesting',
+					duplicate: 'Person.FirstName',
+				}
+			})
 		})
 
-		it ("lists all the sources", function () {
+		it ("lists all the sources, ignoring duplicates", function () {
 			expect( mapper.sources() ).to.have.same.members([
 				'Person.FirstName',
 				'Person.LastName',
@@ -118,39 +115,56 @@ describe ("Mappa", function () {
 	});
 
 
+
+
+
+
+
 	describe (".source_tree()", function () {
 		var mapper
 
 		beforeEach(function () {
-			mapper = sources_example()
+			mapper = Mapper({
+				to: {
+					name: ['Person.FirstName', 'Person.LastName'],
+					first_name: 'Person.FirstName',
+					city: 'Address.CityName',
+					age: 'Person.Age',
+					other: 'TopLevel',
+					deep: 'Person.Deep.Nesting',
+					duplicate_name_in_child: 'Duplicate.Person.FirstName',
+				}
+			})
 		})
 
-		it ("lists all the sources", function () {
-			expect( mapper.source_tree() ).to.have.same.members([
-				'TopLevel',
-				{
-					from: 'Person',
-					tree: [
-						'FirstName',
-						'LastName',
-						'Age',
-						{
-							from: 'Deep',
-							tree: ['Nesting']
+		it ("lists all the unique sources", function () {
+			expect( mapper.source_tree() ).to.eql({
+				fields: ['TopLevel'],
+				from: {
+					Person: {
+						fields: ['FirstName', 'LastName', 'Age'],
+						from: {
+							Deep: {
+								fields: ['Nesting']
+							}
 						}
-					]
-				},
-				{ from: 'Address', tree: ['CityName']},
-			])
-		});
+					},
+					Address: {
+						fields: ['CityName'],
+					},
+					Duplicate: {
+						from: {
+							Person: {
+								fields: ['FirstName'],
+							}
+						}
+					}
+				}
+			})
+		})
 
+	})
 
-		it ("lists the sources for selected paths", function () {
-			expect( mapper.source_tree(['name', 'age']) ).to.have.same.members([
-				{from: 'Person', tree: ['FirstName', 'LastName', 'Age']}
-			])
-		});
-	});
 
 });
 
