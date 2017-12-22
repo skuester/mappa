@@ -84,12 +84,12 @@ suite
 --------------------------------------
 	CURRENT BEST
 --------------------------------------
-source_tree() x 32,207 ops/sec ±1.40% (84 runs sampled)
-source_tree() for select keys x 39,733 ops/sec ±1.23% (86 runs sampled)
-sources() x 872,653 ops/sec ±2.27% (79 runs sampled)
-sources() for select keys x 617,370 ops/sec ±1.78% (81 runs sampled)
-read() x 43,493 ops/sec ±1.21% (86 runs sampled)
-write() x 33,060 ops/sec ±0.90% (87 runs sampled)
+source_tree() x 39,035 ops/sec ±2.20% (87 runs sampled)
+source_tree() for select keys x 45,090 ops/sec ±2.10% (82 runs sampled)
+sources() x 1,535,816 ops/sec ±2.10% (83 runs sampled)
+sources() for select keys x 851,586 ops/sec ±2.48% (78 runs sampled)
+read() x 43,883 ops/sec ±2.30% (80 runs sampled)
+write() x 32,832 ops/sec ±2.56% (72 runs sampled)
 Fastest is sources()
 
 */
