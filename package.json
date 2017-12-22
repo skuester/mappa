@@ -5,7 +5,8 @@
   "main": "mappa.js",
   "scripts": {
     "test": "mocha mappa.spec.js",
-    "test:w": "mocha --watch mappa.spec.js mappa.js"
+    "test:w": "mocha --watch mappa.spec.js mappa.js",
+    "benchmark": "node benchmark.js"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
   "license": "MIT",
   "homepage": "https://bitbucket.org/skuester/mappa#readme",
   "devDependencies": {
+    "benchmark": "^2.1.4",
     "chai": "^3.5.0",
     "mocha": "^2.4.5"
   },
