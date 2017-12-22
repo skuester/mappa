@@ -5,7 +5,6 @@ var _set = require('lodash/set')
 var _isString = require('lodash/isString')
 var _isArray = require('lodash/isArray')
 var _isObject = require('lodash/isObject')
-var _forEach = require('lodash/forEach')
 var _intersection = require('lodash/intersection')
 var _pick = require('lodash/pick')
 // var Helper = require('./lib/helper')
@@ -28,19 +27,19 @@ function Mapper(opts) {
 Mapper.prototype.read = function (source) {
 	if (!_isObject(source) || _isArray(source)) return
 
-	var target = {}
+	var target = {}, path
 
-	_forEach(this.actions, function (action, path) {
+	for (path in this.actions) {
 
-		var values = action.from.map(function (p){
+		var values = this.actions[path].from.map(function (p){
 			return _get(source, p)
 		})
 
-		var read_value = action.read.apply(null, values)
+		var read_value = this.actions[path].read.apply(null, values)
 		if (typeof read_value !== 'undefined') {
 			_set(target, path, read_value)
 		}
-	})
+	}
 
 	return target
 }
@@ -49,15 +48,15 @@ Mapper.prototype.read = function (source) {
 Mapper.prototype.write = function (target) {
 	if (!_isObject(target) || _isArray(target)) return
 
-	var source = {}
+	var source = {}, path
 
-	_forEach(this.actions, function (action, path) {
-		var values = action.write(_get(target, path))
+	for (path in this.actions) {
+		var values = this.actions[path].write(_get(target, path))
 
-		action.from.forEach(function (source_path, i) {
+		this.actions[path].from.forEach(function (source_path, i) {
 			_set(source, source_path, values[i])
 		})
-	})
+	}
 
 	return source
 };
@@ -93,10 +92,10 @@ Mapper.prototype.source_tree = function(picked_paths){
 
 
 function get_source_tree_for_node(node, output) {
-	var output = {}
+	var output = {}, key
 
-	_forEach(node, function (value, key) {
-		if (value === true) {
+	for (key in node) {
+		if (node[key] === true) {
 			output.fields = output.fields || []
 			output.fields.push(key)
 		}
@@ -104,7 +103,7 @@ function get_source_tree_for_node(node, output) {
 			output.from = output.from || {}
 			output.from[key] = get_source_tree_for_node(node[key])
 		}
-	})
+	}
 
 	return output
 }
