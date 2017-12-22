@@ -1,3 +1,5 @@
+"use_strict";
+
 var _get = require('lodash/get')
 var _set = require('lodash/set')
 var _isString = require('lodash/isString')
@@ -33,7 +35,10 @@ Mapper.prototype.read = function (source) {
 			return _get(source, p)
 		})
 
-		_set(target, path, action.read.apply(null, values))
+		var read_value = action.read.apply(null, values)
+		if (typeof read_value !== 'undefined') {
+			_set(target, path, read_value)
+		}
 	})
 
 	return target

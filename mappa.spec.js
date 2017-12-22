@@ -25,12 +25,13 @@ describe ("Mappa", function () {
 						from: ['person.FirstName', 'person.LastName'],
 						read: function (first, last) {
 							if (!first) return "default!"
+							if (first == "return_undefined") return
 							return first + ' ' + last
 						},
 						write: function (value) {
 							return value.split(' ')
 						}
-					}
+					},
 				}
 			})
 		})
@@ -49,6 +50,10 @@ describe ("Mappa", function () {
 
 			it ("calls the read() fn even when the values it needs are not present", function () {
 				expect( mapper.read({foo: 'bar'}) ).to.eql( {name: 'default!'} )
+			});
+
+			it ("does not output the target key if the read fn returns undefined", function () {
+				expect( mapper.read({person: {FirstName: 'return_undefined'}}) ).to.eql( {} )
 			});
 		});
 
