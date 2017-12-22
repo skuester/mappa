@@ -163,6 +163,28 @@ describe ("Mappa", function () {
 			})
 		})
 
+		it ("lists all the unique sources from selected keys", function () {
+			expect( mapper.source_tree(['name', 'first_name']) ).to.eql({
+				from: {
+					Person: {
+						fields: ['FirstName', 'LastName']
+					}
+				}
+			})
+
+			expect( mapper.source_tree(['deep']) ).to.eql({
+				from: {
+					Person: {
+						from: {
+							Deep: {
+								fields: ['Nesting']
+							}
+						}
+					}
+				}
+			})
+		});
+
 	})
 
 
