@@ -17,10 +17,12 @@ function Mappa(opts) {
 	return new Mapper(opts)
 }
 
+Mappa.Registry = Registry
 
 function Mapper(opts) {
 	this.opts = opts
-	this.actions = normalize_actions(opts.to)
+	this.actions = normalize_actions(opts.to, opts.from)
+	// console.log("this.actions", this.actions)
 }
 
 
@@ -110,11 +112,11 @@ function get_source_tree_for_node(node, output) {
 
 
 
-function normalize_actions(target_config) {
+function normalize_actions(target_config, from_path) {
 	var path
 
 	for (path in target_config) {
-		target_config[path] = PathConfig(target_config[path])
+		target_config[path] = PathConfig(target_config[path], from_path)
 	}
 
 	return target_config
@@ -122,12 +124,14 @@ function normalize_actions(target_config) {
 
 
 
-function PathConfig(config) {
+function PathConfig(config, from_path) {
 	if (_isString(config) || _isArray(config)) {
 		config = {from: config}
 	}
 
-	config.from = [].concat(config.from)
+	to_abs_source_path = from_path ? prefixer(from_path) : identity
+
+	config.from = [].concat(config.from).map(to_abs_source_path)
 	config.read = config.read || pass_thru
 	config.write = config.write || pass_thru
 
@@ -137,3 +141,51 @@ function PathConfig(config) {
 
 
 function pass_thru(value) { return value }
+
+
+
+
+
+function Registry() {
+	var mappers = {}
+
+	return {
+		get: get,
+		use: use,
+		define: define
+	}
+
+
+	function get(name) {
+		var mapper = mappers[name]
+		if (!mapper) throw new Error('No mapper defined for: ' + name)
+		return mapper
+	}
+
+
+	function use(name, opts) {
+		return Object.assign({
+			read: function (value) {
+				return get(name).read(value)
+			},
+
+			write: function (value) {
+				return get(name).write(value)
+			}
+		}, opts)
+	}
+
+
+	function define(name, opts) {
+		mappers[name] = new Mapper(opts)
+	}
+}
+
+
+function prefixer(prefix) {
+	return function (str) {
+		return prefix + '.' + str
+	}
+}
+
+function identity(v) { return v }

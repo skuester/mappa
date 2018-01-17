@@ -191,6 +191,96 @@ describe ("Mappa", function () {
 	})
 
 
+
+
+	describe ("nested mappers with a registry", function () {
+		var source, target, mappers
+
+		beforeEach(function () {
+			mappers = Mapper.Registry()
+
+			source = {
+				regMember: {
+					ID: 123,
+					profile: {
+						Person: {
+							FirstName: 'first',
+							LastName: 'last',
+							address: {
+								Address: {
+									Address1: '123 Street'
+								}
+							}
+						}
+					}
+				}
+			}
+
+			target = {
+				id: 123,
+				profile: {
+					name: 'first last',
+					address: {
+						street1: '123 Street'
+					}
+				}
+			}
+
+			mappers.define('person', {
+				from: 'Person',
+				to: {
+					name: {
+						from: ['FirstName', 'LastName'],
+						read: function (first, last) {
+							return [first, last].join(' ')
+						},
+						write: function (name) {
+							return name.split(' ')
+						}
+					},
+					address: mappers.use('address', {from: 'address'})
+				}
+			})
+
+			mappers.define('member', {
+				from: 'regMember',
+				to: {
+					id: 'ID',
+					profile: mappers.use('person', {from: 'profile'})
+				}
+			})
+
+
+			mappers.define('address', {
+				from: 'Address',
+				to: {
+					street1: 'Address1'
+				}
+			})
+		})
+
+
+		it ("read()s correctly", function () {
+			expect( mappers.get('member').read(source) ).to.eql( target )
+		});
+
+		it ("writes()s correctly", function () {
+			expect( mappers.get('member').write(target) ).to.eql( source )
+		});
+
+		// describe (".sources()", function () {
+		// 	it ("returns a list including all sub mappers", function () {
+		// 		expect( mappers.get('member').sources() ).to.eql([
+		// 			'regMember.ID',
+		// 			'regMember.profile.Person.FirstName',
+		// 			'regMember.profile.Person.LastName',
+		// 			'regMember.profile.Person.address.Address.Address1',
+		// 		])
+		// 	});
+		// });
+	});
+
+
 });
 
 
