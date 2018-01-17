@@ -73,7 +73,12 @@ Mapper.prototype.sources = function(picked_paths){
 
 	var out = [], key
 	for (key in actions) {
-		out = out.concat(actions[key].from)
+		if (actions[key].mapper) {
+			out = out.concat(actions[key].mapper().sources().map(prefixer(actions[key].from)))
+		}
+		else {
+			out = out.concat(actions[key].from)
+		}
 	}
 	return out
 };
@@ -165,6 +170,9 @@ function Registry() {
 
 	function use(name, opts) {
 		return Object.assign({
+			mapper: function () {
+				return get(name)
+			},
 			read: function (value) {
 				return get(name).read(value)
 			},

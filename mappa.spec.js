@@ -268,16 +268,23 @@ describe ("Mappa", function () {
 			expect( mappers.get('member').write(target) ).to.eql( source )
 		});
 
-		// describe (".sources()", function () {
-		// 	it ("returns a list including all sub mappers", function () {
-		// 		expect( mappers.get('member').sources() ).to.eql([
-		// 			'regMember.ID',
-		// 			'regMember.profile.Person.FirstName',
-		// 			'regMember.profile.Person.LastName',
-		// 			'regMember.profile.Person.address.Address.Address1',
-		// 		])
-		// 	});
-		// });
+		describe (".sources()", function () {
+			it ("returns a list of only immediate sources when unqualified, to avoid loops", function () {
+				expect( mappers.get('member').sources() ).to.eql([
+					'regMember.ID',
+					'regMember.profile',
+				])
+			});
+
+			it ("returns a full list for specific keys", function () {
+				expect( mappers.get('member').sources(['id', 'profile.name', 'profile.address.street1']) ).to.eql([
+					'regMember.ID',
+					'regMember.profile.Person.FirstName',
+					'regMember.profile.Person.LastName',
+					'regMember.profile.Person.address.Address.Address1',
+				])
+			});
+		});
 	});
 
 
