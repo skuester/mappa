@@ -78,12 +78,31 @@ describe ("Mappa", function () {
 
 
 	describe ("main_source_path", function () {
-		it ("returns the primary top-level path if there is one", function () {
-			var mapper = Mapper({
+		var mapper
+
+		beforeEach(function () {
+			mapper = Mapper({
 				from: 'Foo',
-				to: {}
+				to: {
+					new_bar: 'Bar'
+				}
 			})
+		})
+
+		it ("returns the primary top-level path if there is one", function () {
 			expect( mapper.main_source_path ).to.eql( 'Foo' )
+		});
+
+		it ("won't return anything when the main source path is empty", function () {
+			expect( mapper.read({Bar: 'Bar value'}) ).to.be.undefined
+		});
+
+		it ("will assume the input under the main_source_path if an optino is used.", function () {
+			expect( mapper.read({Bar: 'Bar value'}, {as_main_source: true}) ).to.eql({ new_bar: 'Bar value'})
+		});
+
+		it ("still doesn't return anything if child paths are not available", function () {
+			expect( mapper.read({Foo: {}}) ).to.be.undefined
 		});
 	});
 
