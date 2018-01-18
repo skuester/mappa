@@ -77,6 +77,17 @@ describe ("Mappa", function () {
 	}); // basic examples
 
 
+	describe ("main_source_path", function () {
+		it ("returns the primary top-level path if there is one", function () {
+			var mapper = Mapper({
+				from: 'Foo',
+				to: {}
+			})
+			expect( mapper.main_source_path ).to.eql( 'Foo' )
+		});
+	});
+
+
 
 
 
@@ -203,14 +214,10 @@ describe ("Mappa", function () {
 				regMember: {
 					ID: 123,
 					profile: {
-						Person: {
-							FirstName: 'first',
-							LastName: 'last',
-							address: {
-								Address: {
-									Address1: '123 Street'
-								}
-							}
+						FirstName: 'first',
+						LastName: 'last',
+						address: {
+							Address1: '123 Street'
 						}
 					}
 				}
@@ -260,7 +267,7 @@ describe ("Mappa", function () {
 		})
 
 
-		it ("read()s correctly", function () {
+		it ("read()s correctly, using the main_source_path for nested mappers", function () {
 			expect( mappers.get('member').read(source) ).to.eql( target )
 		});
 
@@ -276,13 +283,60 @@ describe ("Mappa", function () {
 				])
 			});
 
+			it ("traverses related mappers when needed", function () {
+				expect( mappers.get('member').sources(['profile']) ).to.eql(['regMember.profile'])
+				expect( mappers.get('member').sources(['profile.name']) ).to.eql(['regMember.profile.FirstName', 'regMember.profile.LastName'])
+				expect( mappers.get('member').sources(['profile.address.street1']) ).to.eql(['regMember.profile.address.Address1'])
+			});
+
 			it ("returns a full list for specific keys", function () {
 				expect( mappers.get('member').sources(['id', 'profile.name', 'profile.address.street1']) ).to.eql([
 					'regMember.ID',
-					'regMember.profile.Person.FirstName',
-					'regMember.profile.Person.LastName',
-					'regMember.profile.Person.address.Address.Address1',
+					'regMember.profile.FirstName',
+					'regMember.profile.LastName',
+					'regMember.profile.address.Address1',
 				])
+			});
+
+
+			it ("ignores duplicates", function () {
+				expect( mappers.get('member').sources(['profile.name', 'profile.name']) ).to.eql([
+					'regMember.profile.FirstName',
+					'regMember.profile.LastName',
+				])
+			});
+		});
+
+
+
+
+		describe (".source_tree()", function () {
+			it ("works with immediate sources when no fields present", function () {
+				expect( mappers.get('member').source_tree() ).to.eql({
+					from: {
+						regMember: {
+							fields: ['ID', 'profile']
+						}
+					}
+				})
+			});
+
+			it ("works with nested mappers", function () {
+				expect( mappers.get('member').source_tree(['profile.address.street1']) ).to.eql({
+					from: {
+						regMember: {
+							from: {
+								profile: {
+									from: {
+										address: {
+											fields: ['Address1']
+										}
+									}
+								}
+							}
+						}
+					}
+				})
 			});
 		});
 	});

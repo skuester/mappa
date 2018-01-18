@@ -7,6 +7,7 @@ var _isArray = require('lodash/isArray')
 var _isObject = require('lodash/isObject')
 var _intersection = require('lodash/intersection')
 var _pick = require('lodash/pick')
+var _uniq = require('lodash/uniq')
 // var Helper = require('./lib/helper')
 
 // TODO: Object.keys shim
@@ -21,13 +22,17 @@ Mappa.Registry = Registry
 
 function Mapper(opts) {
 	this.opts = opts
-	this.actions = normalize_actions(opts.to, opts.from)
-	// console.log("this.actions", this.actions)
+	this.main_source_path = opts.from
+	this.actions = normalize_actions(opts.to, this.main_source_path)
 }
 
 
-Mapper.prototype.read = function (source) {
+Mapper.prototype.read = function (source, opts) {
 	if (!_isObject(source) || _isArray(source)) return
+
+	if (opts && opts.as_main_source && this.main_source_path) {
+		source = _set({}, this.main_source_path, source)
+	}
 
 	var target = {}, path
 
@@ -47,7 +52,7 @@ Mapper.prototype.read = function (source) {
 }
 
 
-Mapper.prototype.write = function (target) {
+Mapper.prototype.write = function (target, opts) {
 	if (!_isObject(target) || _isArray(target)) return
 
 	var source = {}, path
@@ -60,27 +65,47 @@ Mapper.prototype.write = function (target) {
 		})
 	}
 
+	if (opts && opts.as_main_source && this.main_source_path) {
+		return _get(source, this.main_source_path)
+	}
+
 	return source
 };
 
 
-Mapper.prototype.sources = function(picked_paths){
+Mapper.prototype.sources = function(picked_paths, opts){
 	var self = this
+	var out = []
 
-	var actions = picked_paths ?
-		_pick(this.actions, picked_paths) :
-		this.actions
+	var as_main_source = (opts && opts.as_main_source && self.main_source_path)
 
-	var out = [], key
-	for (key in actions) {
-		if (actions[key].mapper) {
-			out = out.concat(actions[key].mapper().sources().map(prefixer(actions[key].from)))
+
+	if (!picked_paths || !picked_paths.length) {
+		picked_paths = Object.keys(this.actions)
+	}
+
+	picked_paths.forEach(function (path) {
+		if (_isString(path)) path = path.split('.')
+		var action = self.actions[path[0]]
+		if (!action) throw new Error('Missing output path: ' + path[0])
+
+		var source_paths = (as_main_source) ? UGLY_remove_main_source_path(action.from) : action.from
+
+		if (path.length > 1 && action.mapper) {
+			out = out.concat(action.mapper().sources([path.slice(1)], {as_main_source: true}).map(prefixer(source_paths)))
 		}
 		else {
-			out = out.concat(actions[key].from)
+			out = out.concat(source_paths)
 		}
+	})
+
+	return _uniq(out)
+
+	function UGLY_remove_main_source_path(source_paths) {
+		return source_paths.map(function (path) {
+			return path.replace(self.main_source_path + '.', '')
+		})
 	}
-	return out
 };
 
 
@@ -174,11 +199,11 @@ function Registry() {
 				return get(name)
 			},
 			read: function (value) {
-				return get(name).read(value)
+				return get(name).read(value, {as_main_source: true})
 			},
 
 			write: function (value) {
-				return get(name).write(value)
+				return get(name).write(value, {as_main_source: true})
 			}
 		}, opts)
 	}
